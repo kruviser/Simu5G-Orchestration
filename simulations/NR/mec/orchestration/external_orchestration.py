@@ -3,10 +3,18 @@
 
 import sys
 from numpy import double
+import pandas as pd  
 
 # k: current number of tasks
 # m: number of servers
 # n: server capacity
+
+def read_file(file):  
+    df = pd.read_table(file, delim_whitespace=True, header=None, names=['timestamps', 'tasks'])
+    # timestamp = np.array(df.iloc[:,:-1].values.flatten().tolist())
+    # tasks = df.iloc[:,-1].to_numpy()
+    # print(df)
+    return df  
 
 def orchestration(k, m, n, method): 
     if method == 'by_threshold':
@@ -33,21 +41,31 @@ def orchestration(k, m, n, method):
             return -1
         else: 
             return 0 
-        
-        
-            
-if __name__ == "__main__":
-    
+    elif method == 'oracle':         # activation based on the current number of tasks
+        # return tasks value based on timestamp value 
+        # task = df.loc[df['timestamps'] == timestamp, 'tasks'].iloc[0]    
+        # if task > m*n: 
+        #     return 1 
+        # elif task < m*n: 
+        #     return -1 
+        # else: 
+        #     return 0  
+               
+if __name__ == "__main__": 
     # print(f"Arguments count: {len(sys.argv)}")
     # for i, arg in enumerate(sys.argv):
     #   print(f"Argument {i:>6}: {arg}")
+    
+    file = 'traceFile_timestamp_custom.txt'
+    df = read_file(file)
         
     tasks = int(sys.argv[1])        
-    m = int(sys.argv[2])
+    m = int(sys.argv[2]) 
     n = int(sys.argv[3]) 
     time = double(sys.argv[4])
     method = 'by_threshold'
-    
+
     action = orchestration(tasks, m, n, method)
+    # action = orchestration(tasks, m, n, t_stamp, method)
     print(action) 
     
