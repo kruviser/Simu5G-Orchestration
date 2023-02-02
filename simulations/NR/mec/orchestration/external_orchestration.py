@@ -50,6 +50,17 @@ def orchestration(k, m, n, timestamp, method):
             return -1 
         else: 
             return 0  
+        
+        # return tasks value based on next timestamp value 
+        # ind = df.index[df['timestamps'] == timestamp].tolist() 
+        # ind = ind[0]
+        # task = df['tasks'].iloc[ind+1]    
+        # if task > m*n: 
+        #     return 1 
+        # elif task < m*n: 
+        #     return -1 
+        # else: 
+        #     return 0  
                
 if __name__ == "__main__": 
     # print(f"Arguments count: {len(sys.argv)}")
