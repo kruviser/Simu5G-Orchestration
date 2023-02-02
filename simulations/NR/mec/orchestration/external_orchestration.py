@@ -16,7 +16,7 @@ def read_file(file):
     # print(df)
     return df  
 
-def orchestration(k, m, n, method): 
+def orchestration(k, m, n, timestamp, method): 
     if method == 'by_threshold':
         thr = 5                      # to be defined manually  
         if k >= m*n - thr:
@@ -43,13 +43,13 @@ def orchestration(k, m, n, method):
             return 0 
     elif method == 'oracle':         # activation based on the current number of tasks
         # return tasks value based on timestamp value 
-        # task = df.loc[df['timestamps'] == timestamp, 'tasks'].iloc[0]    
-        # if task > m*n: 
-        #     return 1 
-        # elif task < m*n: 
-        #     return -1 
-        # else: 
-        #     return 0  
+        task = df.loc[df['timestamps'] == timestamp, 'tasks'].iloc[0]    
+        if task > m*n: 
+            return 1 
+        elif task < m*n: 
+            return -1 
+        else: 
+            return 0  
                
 if __name__ == "__main__": 
     # print(f"Arguments count: {len(sys.argv)}")
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     time = double(sys.argv[4])
     method = 'by_threshold'
 
-    action = orchestration(tasks, m, n, method)
-    # action = orchestration(tasks, m, n, t_stamp, method)
+    # action = orchestration(tasks, m, n, method)
+    action = orchestration(tasks, m, n, time, method)
     print(action) 
     
