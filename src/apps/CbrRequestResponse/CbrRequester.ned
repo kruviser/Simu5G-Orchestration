@@ -27,8 +27,8 @@ simple CbrRequester like IApp
         int tos = default(-1); // if not -1, set the Type Of Service (IPv4) / Traffic Class (IPv6) field of sent packets to this value
         
         bool enableSecondaryResponder = default(false);
-        string secondaryDestAddress;
-        int secondaryLocalPort;
+        string secondaryDestAddress = default("");
+        int secondaryLocalPort = default(4000);
         int secondaryDestPort = default(3000);
         
         bool enableOrchestration = default(false);

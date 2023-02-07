@@ -276,6 +276,8 @@ bool BgMecAppManager::relocateBgMecApp(int appId, cModule* mecHost)
         else if(msg->isName("balancingTimer"))
         {
             EV << "BgMecAppManager::handleMessage (balanceTimer) - re-balancing load among servers" << endl;
+            //doOrchestration( currentBgMecApps_ );
+
             updateBgMecAppsLoad(currentBgMecApps_);
             scheduleAfter(balancingInterval_, balancingTimer_);
         }
@@ -412,10 +414,10 @@ void BgMecAppManager::externalOrchestration(int numApps)
 
     EV << "BgMecAppManager::externalOrchestration - APP on gNB " << reqGNB << " - exEdge resource on gNB " << respGNB << endl;
     // if a new server would be needed, but an extreme edge node is available
-    if( activate == 1 && reqGNB == respGNB )
-    {
-        activate = 3;
-    }
+//    if( activate == 1 && reqGNB == respGNB )
+//    {
+//        activate = 3;
+//    }
     //========================================================
 
     EV << "BgMecAppManager::externalOrchestration - decision is " << activate << endl;

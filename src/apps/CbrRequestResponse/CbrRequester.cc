@@ -259,11 +259,17 @@ void CbrRequester::setCurrentResponder( CurrentResponder responder )
     EV << "CbrRequester::setCurrentResponder - setting current responder to ";
     if( responder == PRIMARY )
     {
-        EV << "SECONDARY";
+        EV << "PRIMARY";
+    }
+    else if( !par("enableSecondaryResponder").boolValue() )
+    {
+        EV << "PRIMARY (no secondary enabled)";
+        responder = PRIMARY;
+
     }
     else if( responder == SECONDARY )
     {
-        EV << "PRIMARY";
+        EV << "SECONDARY";
     }
 
     EV << ". (Was " << currentResponder_ << ") "<< endl;
