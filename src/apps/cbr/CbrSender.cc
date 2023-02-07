@@ -53,7 +53,13 @@ void CbrSender::initialize(int stage)
         localPort_ = par("localPort");
         destPort_ = par("destPort");
 
+        useRandIPT_ = par("randInterpacketTime").boolValue();
+        minIPT_ = par("minIPT");
+        maxIPT_ = par("maxIPT");
+
         txBytes_ = 0;
+
+
 
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER)
@@ -61,6 +67,9 @@ void CbrSender::initialize(int stage)
         // calculating traffic starting time
         startTime_ = par("startTime");
         finishTime_ = par("finishTime");
+
+        if(useRandIPT_)
+            sampling_time = uniform(minIPT_,maxIPT_);
 
         EV << " finish time " << finishTime_ << endl;
         nframes_ = (finishTime_ - startTime_) / sampling_time;
@@ -140,6 +149,8 @@ void CbrSender::sendCbrPacket()
     }
     socket.sendTo(packet, destAddress_, destPort_);
 
+    if(useRandIPT_)
+        sampling_time = uniform(minIPT_,maxIPT_);
     scheduleAt(simTime() + sampling_time, selfSource_);
 }
 

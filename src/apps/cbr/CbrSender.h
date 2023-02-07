@@ -37,6 +37,11 @@ class CbrSender : public omnetpp::cSimpleModule
     omnetpp::simtime_t startTime_;
     omnetpp::simtime_t finishTime_;
 
+    // the following three variables regulate the usage of a random inter packet time for each new packet
+    bool useRandIPT_;
+    omnetpp::simtime_t minIPT_;
+    omnetpp::simtime_t maxIPT_;
+
     static omnetpp::simsignal_t cbrGeneratedThroughtputSignal_;
     static omnetpp::simsignal_t cbrGeneratedBytesSignal_;
     static omnetpp::simsignal_t cbrSentPktSignal_;
