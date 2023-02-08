@@ -26,8 +26,15 @@ simple BgMecAppManager
 	    string mecHostList = default("mecHost"); //comma-space separatedList of MecHosts
 	    
 	    int orchestrationType = default(0); // DUMMY_ORCHESTRATION = 0 , EXTERNAL_ORCHESTRATION = 1
+	    string orchestrationPolicy = default("by_threshold");
 	    bool enablePeriodicLoadBalancing = default(false);
     	double balancingInterval @unit(s) = default(0.5s);
+    	
+		@signal[activationDecisionSignal];
+        @statistic[activationDecision](title="orchestration decision"; unit=""; source="activationDecisionSignal"; record=vector);
+        
+		@signal[totalAppSignal];
+        @statistic[totalApp](title="total number of applications"; unit=""; source="totalAppSignal"; record=vector);        
     	
         // if automatic == true
         double deltaTime @unit(s) = default(1s);

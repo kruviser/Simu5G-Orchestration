@@ -88,6 +88,9 @@ class BgMecAppManager : public omnetpp::cSimpleModule {
         omnetpp::cMessage* deltaMsg_;
         double deltaTime_;
 
+        static omnetpp::simsignal_t activationDecisionSignal_;
+        static omnetpp::simsignal_t totalAppSignal_;
+
         // maximum and minimum load of a MEC host from the perspective of the orchestrator
         int maxBgMecApp_;
         int minBgMecApp_;
@@ -108,10 +111,12 @@ class BgMecAppManager : public omnetpp::cSimpleModule {
         int lastBalancedHosts_;
 
         OrchestrationType orchestrationType_;
+        std::string orchestrationPolicy_;
 
         // handles the activation time of MEC hosts. Deactivation is instead instantaneous.
         bool enableHostActivationDelay_;
         double mecHostActivationTime_;
+        bool hostActivationTriggered_;
 
 
         // orchestration functions

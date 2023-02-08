@@ -18,6 +18,12 @@ using namespace omnetpp;
 Define_Module(BgMecAppManager);
 
 
+
+simsignal_t BgMecAppManager::activationDecisionSignal_ = registerSignal("activationDecisionSignal");
+simsignal_t BgMecAppManager::totalAppSignal_ = registerSignal("totalAppSignal");
+
+
+
 BgMecAppManager::~BgMecAppManager()
 {
     for (auto& bgMecApp: bgMecApps_)
@@ -66,11 +72,12 @@ void BgMecAppManager::initialize(int stage)
     lastBalancedHosts_ = -1; // last number of active hosts seen by the load balancer (used to avoid unnecessary balancing)
 
     enableHostActivationDelay_ = par("enableHostActivationDelay").boolValue();
+    hostActivationTriggered_ = false;
 
     if(enablePeriodicLoadBalancing_)
     {
         balancingTimer_ = new cMessage("balancingTimer");
-        scheduleAfter(balancingInterval_, balancingTimer_);
+        scheduleAfter(balancingInterval_+0.001, balancingTimer_);
     }
 
     int orch = par("orchestrationType").intValue();
@@ -86,6 +93,7 @@ void BgMecAppManager::initialize(int stage)
             orchestrationType_ = DUMMY_ORCHESTRATION;
     }
 
+    orchestrationPolicy_ = par("orchestrationPolicy").stringValue();
 
     defaultRam_ = par("defaultRam");
     defaultDisk_ = par("defaultDisk");
@@ -258,8 +266,9 @@ bool BgMecAppManager::relocateBgMecApp(int appId, cModule* mecHost)
             int numApps = snapshotList_.front().numMecApps;
             EV << "BgMecAppManager::handleMessage (snapshotMsg) - current number of BG Mec Apps " << currentBgMecApps_ << ", expected " << numApps << endl;
 
+            emit(totalAppSignal_,numApps);
             // call orchestration algorithm HERE
-            doOrchestration( numApps );
+            //doOrchestration( numApps );
 
             updateBgMecAppsLoad( numApps );
 
@@ -276,7 +285,7 @@ bool BgMecAppManager::relocateBgMecApp(int appId, cModule* mecHost)
         else if(msg->isName("balancingTimer"))
         {
             EV << "BgMecAppManager::handleMessage (balanceTimer) - re-balancing load among servers" << endl;
-            //doOrchestration( currentBgMecApps_ );
+            doOrchestration( currentBgMecApps_ );
 
             updateBgMecAppsLoad(currentBgMecApps_);
             scheduleAfter(balancingInterval_, balancingTimer_);
@@ -289,6 +298,7 @@ bool BgMecAppManager::relocateBgMecApp(int appId, cModule* mecHost)
         // ==============================
         else if(msg->isName("mecHostActivation"))
         {
+            hostActivationTriggered_ = false;
             activateNewMecHost();
             delete msg;
         }// ==============================
@@ -347,11 +357,16 @@ void BgMecAppManager::doOrchestration( int numApps )
 
 void BgMecAppManager::triggerMecHostActivation()
 {
+    if(hostActivationTriggered_)
+    {
+        EV << "BgMecAppManager::triggerMecHostActivation - host activation already in progress" << endl;
+    }
     if(enableHostActivationDelay_)
     {
         cMessage* activateMecHostMsg = new cMessage("mecHostActivation");
         scheduleAfter(mecHostActivationTime_, activateMecHostMsg);
         EV << "BgMecAppManager::triggerMecHostActivation - Scheduling MEC HOST activation in " << mecHostActivationTime_ << " seconds" << endl;
+        hostActivationTriggered_ = true;
     }
     else
     {
@@ -386,7 +401,8 @@ void BgMecAppManager::externalOrchestration(int numApps)
     // k: current number of tasks
     // m: number of servers
     // n: server capacity
-    cmd << numApps << " " << lastMecHostActivated_+1 << " " << maxBgMecApp_ << " " << simTime();
+    // as the orchestration is slightly offset, we substract 1ms to be aligned with snapshots
+    cmd << numApps << " " << lastMecHostActivated_+1 << " " << maxBgMecApp_ << " " << simTime()-0.001 <<" "<< orchestrationPolicy_;
     cmd << " > decisionFile.txt";
     std::string commandString = cmd.str();
 
@@ -399,6 +415,9 @@ void BgMecAppManager::externalOrchestration(int numApps)
     int activate;
     inputFileStream >> activate;
 
+    std::cout << simTime() << " " << activate << std::endl;
+
+    emit(activationDecisionSignal_,activate);
 
     //============== EXTREME EDGE ORCHESTRATION ==============
     // verify the availability of extreme-edge resources
@@ -446,6 +465,7 @@ void BgMecAppManager::updateBgMecAppsLoad(int numApps)
     // this avoid re-balancing the load when the load in unchanged
     if( (lastBalancedApps_ == currentBgMecApps_) && (lastBalancedHosts_ == lastMecHostActivated_) && deltaApps == 0 )
     {
+        std::cout << simTime() << " balancing skipped" << std::endl;
         EV << "BgMecAppManager::updateBgMecAppsLoad - nothing to do" << endl;
         return;
     }
@@ -512,6 +532,7 @@ void BgMecAppManager::updateBgMecAppsLoad(int numApps)
             createBgModules(runningMecHosts_[lastMecHostActivated_]);
         }
     }
+    std::cout << simTime() << " balancing done" << std::endl;
     // =========================================================
 }
 
@@ -651,6 +672,7 @@ void BgMecAppManager::activateNewMecHost()
     }
     else
     {
+        std::cout << simTime() << " activating mec host" << std::endl;
         EV << "BgMecAppManager::activateNewMecHost() - turning on Mec host with index " << lastMecHostActivated_+1  << endl;
         cModule* mh = mecHosts_[++lastMecHostActivated_];
         mh->getDisplayString().setTagArg("i",1, "green");
