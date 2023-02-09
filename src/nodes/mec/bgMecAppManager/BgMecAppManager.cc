@@ -402,7 +402,7 @@ void BgMecAppManager::externalOrchestration(int numApps)
     // m: number of servers
     // n: server capacity
     // as the orchestration is slightly offset, we substract 1ms to be aligned with snapshots
-    cmd << numApps << " " << lastMecHostActivated_+1 << " " << maxBgMecApp_ << " " << simTime()-0.001 <<" "<< orchestrationPolicy_;
+    cmd << numApps << " " << lastMecHostActivated_+1 << " " << maxBgMecApp_ << " " << simTime()-0.001 <<" "<< orchestrationPolicy_ << " " << par("traceFileName").stringValue();
     cmd << " > decisionFile.txt";
     std::string commandString = cmd.str();
 
