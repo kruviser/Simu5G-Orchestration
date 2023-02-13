@@ -54,7 +54,7 @@ network TrafficlightNetwork
             @display("p=49.14,24.57;is=s");
         }
         server: StandardHost {
-            @display("p=1152.0599,285.285;is=n;i=device/server");
+            @display("p=1053.5,281.75;is=n;i=device/server");
         }
         router: Router {
             @display("p=1105.65,154.245;i=device/smallrouter");
@@ -116,10 +116,27 @@ network TrafficlightNetwork
             @display("p=363.09,378.10498;i=misc/car2");
         }
 
+        serverA: StandardHost {
+            @display("p=1097.9062,281.75;is=n;i=device/server");
+        }
+        serverB: StandardHost {
+            @display("p=1142.3125,281.75;is=n;i=device/server");
+        }
+        serverC: StandardHost {
+            @display("p=1186.7188,281.75;is=n;i=device/server");
+        }
+        serverD: StandardHost {
+            @display("p=1113.2188,376.6875;is=n;i=device/server");
+        }
     connections:
 
         //# Data Network connections
         server.pppg++ <--> Eth10G <--> router.pppg++;
+        serverA.pppg++ <--> Eth10G <--> router.pppg++;
+        serverB.pppg++ <--> Eth10G <--> router.pppg++;
+        serverC.pppg++ <--> Eth10G <--> router.pppg++;
+        serverD.pppg++ <--> Eth10G <--> router.pppg++;
+        
         router.pppg++ <--> Eth10G <--> upf.filterGate;
 
         //# 5G Core Network connections
