@@ -42,6 +42,10 @@ class CbrSender : public omnetpp::cSimpleModule
     omnetpp::simtime_t minIPT_;
     omnetpp::simtime_t maxIPT_;
 
+    bool useRandPacketSize_;
+    double minPsize_;
+    double maxPsize_;
+
     static omnetpp::simsignal_t cbrGeneratedThroughtputSignal_;
     static omnetpp::simsignal_t cbrGeneratedBytesSignal_;
     static omnetpp::simsignal_t cbrSentPktSignal_;

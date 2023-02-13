@@ -57,10 +57,11 @@ void CbrSender::initialize(int stage)
         minIPT_ = par("minIPT");
         maxIPT_ = par("maxIPT");
 
+        useRandPacketSize_ = par("randPacketSize").boolValue();
+        minPsize_ = par("minPsize");
+        maxPsize_ = par("maxPsize");
+
         txBytes_ = 0;
-
-
-
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
@@ -136,6 +137,10 @@ void CbrSender::sendCbrPacket()
     cbr->setNframes(nframes_);
     cbr->setIDframe(iDframe_++);
     cbr->setPayloadTimestamp(simTime());
+
+    if(useRandPacketSize_)
+        size_ = uniform(minPsize_,maxPsize_);
+
     cbr->setPayloadSize(size_);
     cbr->setChunkLength(B(size_));
     cbr->addTag<CreationTimeTag>()->setCreationTime(simTime());
