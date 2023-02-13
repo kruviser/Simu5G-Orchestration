@@ -66,7 +66,7 @@ network TrafficlightNetwork
             @display("p=569.205,155.61");
         }
         gnb1: gNodeB {
-            @display("p=238.875,353.535;is=vl");
+            @display("p=243.46875,352.1875;is=vl");
         }
         gnb2: gNodeB {
             @display("p=920.01,353.535;is=vl");
@@ -116,27 +116,27 @@ network TrafficlightNetwork
             @display("p=363.09,378.10498;i=misc/car2");
         }
 
-        serverA: StandardHost {
+        server_A: StandardHost {
             @display("p=1097.9062,281.75;is=n;i=device/server");
         }
-        serverB: StandardHost {
+        server_B: StandardHost {
             @display("p=1142.3125,281.75;is=n;i=device/server");
         }
-        serverC: StandardHost {
+        server_C: StandardHost {
             @display("p=1186.7188,281.75;is=n;i=device/server");
         }
-        serverD: StandardHost {
+        server_D: StandardHost {
             @display("p=1113.2188,376.6875;is=n;i=device/server");
         }
     connections:
 
         //# Data Network connections
         server.pppg++ <--> Eth10G <--> router.pppg++;
-        serverA.pppg++ <--> Eth10G <--> router.pppg++;
-        serverB.pppg++ <--> Eth10G <--> router.pppg++;
-        serverC.pppg++ <--> Eth10G <--> router.pppg++;
-        serverD.pppg++ <--> Eth10G <--> router.pppg++;
-        
+        server_A.pppg++ <--> Eth10G <--> router.pppg++;
+        server_B.pppg++ <--> Eth10G <--> router.pppg++;
+        server_C.pppg++ <--> Eth10G <--> router.pppg++;
+        server_D.pppg++ <--> Eth10G <--> router.pppg++;
+
         router.pppg++ <--> Eth10G <--> upf.filterGate;
 
         //# 5G Core Network connections
