@@ -22,6 +22,7 @@ simple BgMecAppManager
         bool fromTraceFile = default(true);
         bool admissionControl = default(false);        
         string traceFileName = default("");
+        string predictionFileName = default("");
        	double snapshotPeriod = default(-1); // if <= 0 read the timestamp in the tracefile!
 	    string mecHostList = default("mecHost"); //comma-space separatedList of MecHosts
 	    

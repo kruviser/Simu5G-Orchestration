@@ -402,10 +402,17 @@ void BgMecAppManager::externalOrchestration(int numApps)
     // m: number of servers
     // n: server capacity
     // as the orchestration is slightly offset, we substract 1ms to be aligned with snapshots
-    cmd << numApps << " " << lastMecHostActivated_+1 << " " << maxBgMecApp_ << " " << simTime()-0.001 <<" "<< orchestrationPolicy_ << " " << par("traceFileName").stringValue();
+    cmd << numApps << " " << lastMecHostActivated_+1 << " " << maxBgMecApp_ << " " << simTime()-0.001;
+
+    if( orchestrationPolicy_.compare("prediction") == 0 )
+        cmd <<" "<< "oracle"  << " " << par("predictionFileName").stringValue();
+    else
+        cmd <<" "<< orchestrationPolicy_  << " " << par("traceFileName").stringValue();
+
     cmd << " > decisionFile.txt";
     std::string commandString = cmd.str();
 
+    std::cout << simTime() << " " << cmd.str()<< std::endl;
     EV << "BgMecAppManager::externalOrchestration - launching command " << commandString << endl;
     system(cmd.str().c_str());
 
