@@ -404,6 +404,7 @@ void BgMecAppManager::externalOrchestration(int numApps)
     // as the orchestration is slightly offset, we substract 1ms to be aligned with snapshots
     cmd << numApps << " " << lastMecHostActivated_+1 << " " << maxBgMecApp_ << " " << simTime()-0.001;
 
+    orchestrationPolicy_ = par("orchestrationPolicy").stringValue();
     if( orchestrationPolicy_.compare("prediction") == 0 )
         cmd <<" "<< "oracle"  << " " << par("predictionFileName").stringValue();
     else

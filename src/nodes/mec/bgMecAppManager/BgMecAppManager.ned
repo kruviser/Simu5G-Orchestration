@@ -27,7 +27,7 @@ simple BgMecAppManager
 	    string mecHostList = default("mecHost"); //comma-space separatedList of MecHosts
 	    
 	    int orchestrationType = default(0); // DUMMY_ORCHESTRATION = 0 , EXTERNAL_ORCHESTRATION = 1
-	    string orchestrationPolicy = default("by_threshold");
+	    volatile string orchestrationPolicy @mutable= default("reactive");
 	    bool enablePeriodicLoadBalancing = default(false);
     	double balancingInterval @unit(s) = default(0.5s);
     	

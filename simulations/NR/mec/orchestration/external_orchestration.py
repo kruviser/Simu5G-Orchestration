@@ -49,8 +49,8 @@ def orchestration(k, m, n, timestamp, method):
             #print('task: ', task)
             if task >= m*n:                 
                 return 1               
-        elif k < (m-1)*n - 0.001: 
-            return -1                  
+            elif k < (m-1)*n - 0.001: 
+                return -1                  
         else: 
             return 0     
       
