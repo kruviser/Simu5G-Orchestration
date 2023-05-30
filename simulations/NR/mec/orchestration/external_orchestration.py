@@ -47,9 +47,16 @@ def orchestration(k, m, n, timestamp, method):
             task = df.loc[df['timestamps'] == next_timestamp, 'tasks'].iloc[0]    
             #print('value is on list!')
             #print('task: ', task)
+            
+            # k: current number of tasks
+            # m: number of servers
+            # n: server capacity
+            # task: predicted number of tasks
             if task >= m*n:                 
-                return 1               
-            elif k < (m-1)*n - 0.001: 
+                return 1
+            elif task >= (m-1)*n: 
+                return 0
+        if k < (m-1)*n - 0.001: 
                 return -1                  
         else: 
             return 0     
