@@ -658,7 +658,7 @@ void BgMecAppManager::readMecHosts()
         }
     }
 
-    if(mecHosts_.size() > 1)
+    if(mecHosts_.size() >= 1)
         activateNewMecHost(); //activate the firstMecHostAdded
     return;
 }
