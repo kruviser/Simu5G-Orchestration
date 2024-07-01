@@ -21,4 +21,5 @@ class CbrResponse extends inet::FieldsChunk {
     simtime_t arrivalTime;
     simtime_t payloadTimestamp;
     unsigned int payloadSize;
+    simtime_t AoiConsidered;
 }

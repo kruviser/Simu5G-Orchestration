@@ -31,6 +31,8 @@ class CbrReceiver : public omnetpp::cSimpleModule
 
     bool mInit_;
 
+    inet::simtime_t lastPayloadTimestamp_;
+
     static omnetpp::simsignal_t cbrFrameLossSignal_;
     static omnetpp::simsignal_t cbrFrameDelaySignal_;
     static omnetpp::simsignal_t cbrJitterSignal_;
@@ -45,6 +47,8 @@ class CbrReceiver : public omnetpp::cSimpleModule
     void initialize(int stage) override;
     void handleMessage(omnetpp::cMessage *msg) override;
     virtual void finish() override;
+  public:
+    inet::simtime_t getLastPayloadTimestamp() { return lastPayloadTimestamp_; }
 };
 
 #endif

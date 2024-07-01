@@ -9,18 +9,20 @@
 // and cannot be removed from it.
 //
 
-#include "CbrResponder.h"
+#include "../DigitalTwinApp/DigitalTwinApp.h"
 
-Define_Module(CbrResponder);
+Define_Module(DigitalTwinApp);
 using namespace inet;
 
-simsignal_t CbrResponder::cbrReqFrameLossSignal_ = registerSignal("cbrReqFrameLossSignal");
-simsignal_t CbrResponder::cbrReqFrameDelaySignal_ = registerSignal("cbrReqFrameDelaySignal");
-simsignal_t CbrResponder::cbrReqJitterSignal_ = registerSignal("cbrReqJitterSignal");
-simsignal_t CbrResponder::cbrReqReceivedThroughtput_ = registerSignal("cbrReqReceivedThroughtputSignal");
-simsignal_t CbrResponder::cbrReqReceivedBytesSignal_ = registerSignal("cbrReqReceivedBytesSignal");
+simsignal_t DigitalTwinApp::cbrReqFrameLossSignal_ = registerSignal("cbrReqFrameLossSignal");
+simsignal_t DigitalTwinApp::cbrReqFrameDelaySignal_ = registerSignal("cbrReqFrameDelaySignal");
+simsignal_t DigitalTwinApp::cbrReqJitterSignal_ = registerSignal("cbrReqJitterSignal");
+simsignal_t DigitalTwinApp::cbrReqReceivedThroughtput_ = registerSignal("cbrReqReceivedThroughtputSignal");
+simsignal_t DigitalTwinApp::cbrReqReceivedBytesSignal_ = registerSignal("cbrReqReceivedBytesSignal");
+simsignal_t DigitalTwinApp::AoIatDTSignal_ = registerSignal("AoIatDTSignal");
 
-void CbrResponder::initialize(int stage)
+
+void DigitalTwinApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -38,7 +40,7 @@ void CbrResponder::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
         int port = par("localPort");
-        EV << "CbrResponder::initialize - binding to port: local:" << port << endl;
+        EV << "DigitalTwinApp::initialize - binding to port: local:" << port << endl;
 
         enableVimComputing_ = par("enableVimComputing").boolValue();
         if (port != -1)
@@ -53,20 +55,27 @@ void CbrResponder::initialize(int stage)
                 vim = check_and_cast<VirtualisationInfrastructureManager*>(getParentModule()->getSubmodule("vim"));
 
             enableOrchestration_ = par("enableOrchestration").boolValue();
-            if(enableOrchestration_)
-            {
-                orchestrator_ = check_and_cast<BgMecAppManager*>(getModuleByPath("bgMecAppManager"));
-                orchestrator_->registerOrchestratedResponder(this);
-
-                nrPhy_ = check_and_cast<NRPhyUe*>(getParentModule()->getSubmodule("cellularNic")->getSubmodule("nrPhy"));
-            }
+            // orchestration of DTs currently disabled
+//            if(enableOrchestration_)
+//            {
+//                orchestrator_ = check_and_cast<BgMecAppManager*>(getModuleByPath("bgMecAppManager"));
+//                orchestrator_->registerOrchestratedResponder(this);
+//
+//                nrPhy_ = check_and_cast<NRPhyUe*>(getParentModule()->getSubmodule("cellularNic")->getSubmodule("nrPhy"));
+//            }
 
             processingTimer_  = new cMessage("computeMsg");
+            std::cout << "DigitalTwinApp::handleMessage - " << par("monitoringDT").stringValue() << ", index: " << par("monitoringDTindex").intValue() << endl;
+            int index = par("monitoringDTindex");
+            if( index != -1 )
+                monitoringDT_ = check_and_cast<CbrReceiver*>(getParentModule()->getSubmodule(par("monitoringDT").stringValue(),index));
+            else
+                monitoringDT_ = check_and_cast<CbrReceiver*>(getParentModule()->getSubmodule(par("monitoringDT").stringValue()));
         }
     }
 }
 
-void CbrResponder::handleMessage(cMessage *msg)
+void DigitalTwinApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
@@ -92,7 +101,7 @@ void CbrResponder::handleMessage(cMessage *msg)
         simtime_t delay = simTime()-cbrHeader->getPayloadTimestamp();
         emit(cbrReqFrameDelaySignal_,delay );
 
-        EV << "CbrResponder::handleMessage - Packet received: FRAME[" << cbrHeader->getIDframe() << "/" << cbrHeader->getNframes() << "] with delay["<< delay << "]" << endl;
+        EV << "DigitalTwinApp::handleMessage - Packet received: FRAME[" << cbrHeader->getIDframe() << "/" << cbrHeader->getNframes() << "] with delay["<< delay << "]" << endl;
 
         emit(cbrReqRcvdPkt_, (long)cbrHeader->getIDframe());
 
@@ -106,12 +115,12 @@ void CbrResponder::handleMessage(cMessage *msg)
             {
                 int numInstructions = par("serviceComplexity").doubleValue() * 1000000;
                 processingTime = vim->calculateProcessingTime(-1, numInstructions) ;
-                EV << "CbrResponder::handleMessage - requesting an Edge-Based processing time of " << processingTime << " seconds for " << numInstructions << " instructions" <<endl;
+                EV << "DigitalTwinApp::handleMessage - requesting an Edge-Based processing time of " << processingTime << " seconds for " << numInstructions << " instructions" <<endl;
             }
             else if( computingType == 1 )
             {
                 processingTime = par("extremeEdgeComputingTime");
-                EV << "CbrResponder::handleMessage - requesting a Extreme-Edge-Based processing time of " << processingTime << " seconds" <<endl;
+                EV << "DigitalTwinApp::handleMessage - requesting a Extreme-Edge-Based processing time of " << processingTime << " seconds" <<endl;
             }
 
             rt_stats_.record(processingTime);
@@ -127,17 +136,21 @@ void CbrResponder::handleMessage(cMessage *msg)
         cbr->setPayloadTimestamp(cbrHeader->getPayloadTimestamp());
         cbr->setPayloadSize(respSize_);
         cbr->setChunkLength(B(respSize_));
+
+        simtime_t aoiConsidered = NOW - monitoringDT_->getLastPayloadTimestamp();
+        emit(AoIatDTSignal_,aoiConsidered);
+        cbr->setAoiConsidered(aoiConsidered);
         //cbr->addTag<CreationTimeTag>()->setCreationTime(simTime());
         respPacket_->insertAtBack(cbr);
 
-        EV << "CbrResponder::handleMessage - scheduling response in " << processingTime << " seconds." << endl;
+        EV << "DigitalTwinApp::handleMessage - scheduling response in " << processingTime << " seconds." << endl;
         scheduleAfter(processingTime, processingTimer_);
 
         delete msg;
     }
 }
 
-void CbrResponder::finish()
+void DigitalTwinApp::finish()
 {
     double lossRate = 0;
     if(totFrames_ > 0)

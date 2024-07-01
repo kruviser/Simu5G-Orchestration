@@ -20,6 +20,7 @@ simsignal_t CbrReceiver::cbrJitterSignal_ = registerSignal("cbrJitterSignal");
 simsignal_t CbrReceiver::cbrReceivedThroughtput_ = registerSignal("cbrReceivedThroughtputSignal");
 simsignal_t CbrReceiver::cbrReceivedBytesSignal_ = registerSignal("cbrReceivedBytesSignal");
 
+
 void CbrReceiver::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
@@ -63,6 +64,7 @@ void CbrReceiver::handleMessage(cMessage *msg)
     }
 
     simtime_t delay = simTime()-cbrHeader->getPayloadTimestamp();
+    lastPayloadTimestamp_ = cbrHeader->getPayloadTimestamp();
     emit(cbrFrameDelaySignal_,delay );
 
     EV << "CbrReceiver::handleMessage - Packet received: FRAME[" << cbrHeader->getIDframe() << "/" << cbrHeader->getNframes() << "] with delay["<< delay << "]" << endl;
